@@ -53,7 +53,7 @@ email:test
 password:test
 
 ## env file variables in backend (.env)
-``sh
+``
 SALT=test
 SECRET_KEY=test
 TOKEN_LIFESPAN=test
