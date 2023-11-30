@@ -35,7 +35,8 @@ cd backend
 ``
 
 ### install packages
-``sh
+``
+
 npm i
 ``
 
