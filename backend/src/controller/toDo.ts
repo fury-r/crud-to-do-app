@@ -57,14 +57,8 @@ const updateTodo = async (req: Request, res: Response) => {
 const bulkGetTodo = async (req: Request, res: Response) => {
   const user_id = await validateTokenFromHeader(req);
   try {
-    console.log(user_id);
     const filter = req.query.filter;
-    console.log(
-      `Select id,title,description,due_date,status from Todo where user_id=$1${
-        filter !== "null" && filter !== "undefined" ? " AND status=$2" : ""
-      }`,
-      [user_id, ...(filter !== null && filter !== undefined ? [filter] : [])]
-    );
+
     await dbpg.query(
       `Select id,title,description,due_date,status from Todo where user_id=$1${
         filter !== "null" && filter !== "undefined" ? " AND status=$2" : ""
