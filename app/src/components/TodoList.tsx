@@ -1,60 +1,47 @@
-import { Button } from "react-bootstrap";
-import { useEffect, useState } from "react";
-import axios from "../api/axios";
+import { Button, Form } from "react-bootstrap";
+import { useCallback, useEffect, useState } from "react";
 import DialogBox from "./DialogBox";
 import BackupTableIcon from "@mui/icons-material/BackupTable";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { setTodo } from "../redux/toDo";
+import { useSelector } from "react-redux";
 import { RootState } from "../redux";
 import { Table } from "./Table";
 import { Cards } from "./Cards";
 import { useAuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-
-type operation = "update" | "insert" | "delete" | "complete";
+import { Todo, TOperation } from "../types/todo";
+import { useTodo } from "../hooks/useTodo";
 
 export const TodoList = () => {
   const data = useSelector((state: RootState) => state.toDo.toDo);
-  const [mode, setMode] = useState<operation>("insert");
+  const [mode, setMode] = useState<TOperation>("insert");
   const [view, setView] = useState<boolean>(false); //by default table
-
+  const { bulkGet } = useTodo();
   const [show, setShow] = useState(false);
   const [selected, setSelected] = useState(-1);
-  const dispatch = useDispatch();
   const { setUser } = useAuthContext();
   const navigate = useNavigate();
+
+  const getUserInformation = useCallback(async () => {
+    await bulkGet();
+  }, [bulkGet]);
+
   useEffect(() => {
     getUserInformation();
   }, []);
 
-  const getUserInformation = async () => {
-    await axios
-      .post("todo/bulk/get")
-      .then((res) => {
-        if (res.data) {
-          dispatch(setTodo(res.data.toDo));
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-
-  const handleSelected = (
-    key: React.SetStateAction<number>,
-    mode: operation
-  ) => {
+  const handleSelected = (key: number, mode: TOperation) => {
     setSelected(key);
 
     setShow(true);
     setMode(mode);
   };
 
-  const handleDataChange = () => {
-    getUserInformation();
-  };
+  const handleDataChange = useCallback(() => {
+    () => {
+      getUserInformation();
+    };
+  }, [getUserInformation]);
   const logout = () => {
     setUser();
     navigate("/");
@@ -84,7 +71,11 @@ export const TodoList = () => {
         <></>
       )}
 
-      <div>
+      <div
+        style={{
+          height: "100%",
+        }}
+      >
         <div className="flex-row-between">
           <Button
             onClick={() => {
@@ -106,6 +97,32 @@ export const TodoList = () => {
           >
             Logout
           </Button>
+          <div className="flex-row-between ">
+            <b
+              style={{
+                margin: "5px",
+              }}
+            >
+              Filter:
+            </b>
+            <Form.Select
+              placeholder="12"
+              onChange={async (e) => {
+                const filter = e.target.value;
+                console.log(e.target.value);
+                bulkGet(
+                  filter !== "All" ? (e.target.value as Todo["status"]) : null
+                );
+              }}
+              name="status"
+            >
+              <option value="All">All</option>
+
+              <option value="PENDING">Pending</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="COMPLETED">Completed</option>
+            </Form.Select>
+          </div>
           <Button
             onClick={() => setView((prev) => !prev)}
             className="button"

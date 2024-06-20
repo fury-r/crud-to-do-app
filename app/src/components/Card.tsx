@@ -4,8 +4,17 @@ import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { Button } from "react-bootstrap";
+import { Todo, TOperation } from "../types/todo";
 
-export const Card = ({ value, handleSelected, index }: any) => {
+export const Card = ({
+  value,
+  handleSelected,
+  index,
+}: {
+  value: Todo;
+  handleSelected: (key: number, mode: TOperation) => void;
+  index: number;
+}) => {
   return (
     <MuiCard
       variant="outlined"
@@ -24,6 +33,8 @@ export const Card = ({ value, handleSelected, index }: any) => {
             Description: {value.description}
           </Typography>
           <Typography variant="body2">Due Date: {value.due_date}</Typography>
+
+          <Typography variant="body2">Status: {value.status}</Typography>
         </CardContent>
         <CardActions
           style={{

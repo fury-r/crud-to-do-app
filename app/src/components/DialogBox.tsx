@@ -5,10 +5,11 @@ import { onChange } from "../helper/common";
 import { useTodo } from "../hooks/useTodo";
 import { Todo } from "../types/todo";
 const DialogBox = ({ mode, setShow, show, value, handleDataChange }: any) => {
-  const [data, setData] = useState({
+  const [data, setData] = useState<Todo>({
     title: value?.title,
     due_date: value?.due_date,
     description: value?.description,
+    status: value?.status || "PENDING",
   });
   const { addTodo, deleteTodo, status, updateTodo } = useTodo();
 

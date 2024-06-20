@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import axios from "../api/axios";
-import { deleteTodoRedux, updateTodoRedux } from "../redux/toDo";
+import { deleteTodoRedux, setTodo, updateTodoRedux } from "../redux/toDo";
 import { useCallback, useState } from "react";
 import { Todo } from "../types/todo";
 
@@ -58,10 +58,24 @@ export const useTodo = () => {
     },
     [dispatch]
   );
+
+  const bulkGet = async (filter?: Todo["status"] | null) => {
+    await axios
+      .post(`todo/bulk/get?filter=${filter}`)
+      .then((res) => {
+        if (res.data) {
+          dispatch(setTodo(res.data.toDo));
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
   return {
     addTodo,
     updateTodo,
     deleteTodo,
     status,
+    bulkGet,
   };
 };

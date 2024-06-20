@@ -1,63 +1,46 @@
-import dbConnect = require("../db/connects");
-const db = dbConnect.db;
-import auth = require("../auth");
+import { QueryResultRow } from "pg";
+import { validateToken, validateTokenFromHeader } from "../auth";
+import { dbpg } from "../db/connects";
+import { Request, Response } from "express";
+import { getTokerFromHeader } from "../utils/common";
 
-const addTodo = async (
-  req: {
-    query: any;
-    headers: any;
-    body: {
-      token: any;
-      title: string;
-      description: string;
-      due_date: string;
-    };
-  },
-  res: any
-) => {
-  const { title, description, due_date } = req.body;
+const addTodo = async (req: Request, res: Response) => {
+  const { title, description, due_date, status } = req.body;
   try {
-    const token =
-      req.body.token ||
-      req.query.token ||
-      req.headers["x-access-token"] ||
-      req.headers["authorization"].split(" ")[1];
-    const id = await auth.validateToken(token);
-
-    await db.run(
-      `INSERT INTO Todo(title,description,due_date,user_id) VALUES (?,?,?,?)`,
-      [title, description, due_date, id],
-      (err) => {
-        if (err) {
-          console.error(err.message);
-          return;
+    const id = await validateTokenFromHeader(req);
+    console.log("user_id", id);
+    if (id) {
+      await dbpg.query(
+        `INSERT INTO Todo(title,description,due_date, status,user_id) VALUES ($1,$2,$3,$4,$5)`,
+        [title, description, due_date, status, id],
+        (err, result: QueryResultRow) => {
+          if (err) {
+            console.error(err.message);
+            return;
+          }
+          return res.status(200).json({
+            message: "Submitted Successfully",
+            row: result.rows[0],
+          });
         }
-        return res.status(200).json({
-          message: "Submitted Successfully",
-        });
-      }
-    );
+      );
+    } else {
+      return res.status(401).send({
+        message: "Invalid token.",
+      });
+    }
   } catch (err) {
     console.error(err);
   }
 };
 
-const updateTodo = async (
-  req: {
-    body: {
-      id: string;
-      title: string;
-      description: string;
-      due_date: string;
-    };
-  },
-  res: any
-) => {
-  const { id, title, description, due_date } = req.body;
+const updateTodo = async (req: Request, res: Response) => {
+  const { id, title, description, due_date, status } = req.body;
+
   try {
-    await db.run(
-      `UPDATE Todo SET title=?, description=?, due_date=? where id=?`,
-      [title, description, due_date, id]
+    await dbpg.query(
+      `UPDATE Todo SET title=$1, description=$2, due_date=$3, status=$4 where id=$5`,
+      [title, description, due_date, status, id]
     );
     return res.status(200).json({
       message: "Updated Successfully",
@@ -71,45 +54,30 @@ const updateTodo = async (
     });
   }
 };
-const bulkGetTodo = async (
-  req: {
-    query: any;
-    headers: any;
-    body: {
-      token: any;
-      id: string[];
-    };
-  },
-  res: any
-) => {
-  console.log("bulk get todo");
-
-  const { id = [] } = req.body;
-  const token =
-    req.body.token ||
-    req.query.token ||
-    req.headers["x-access-token"] ||
-    req.headers["authorization"].split(" ")[1];
-  const user_id = await auth.validateToken(token);
+const bulkGetTodo = async (req: Request, res: Response) => {
+  const user_id = await validateTokenFromHeader(req);
   try {
-    await db.all(
-      //   id.length > 0 ? "Select * from Todo where id in ?" :
-      "Select id,title,description,due_date from Todo where user_id=?",
-      [user_id], //   [
-      //     `(${id
-      //       .map((value, index) => {
-      //         console.log(id.length !== 1 && id.length - 1 !== index);
-      //         return `${value}${
-      //           id.length !== 1 && id.length - 1 !== index ? "," : ""
-      //         }`;
-      //       })
-      //       .join("")})`,
-      //   ],
-      async (err: any, rows: any) => {
+    console.log(user_id);
+    const filter = req.query.filter;
+    console.log(
+      `Select id,title,description,due_date,status from Todo where user_id=$1${
+        filter !== "null" && filter !== "undefined" ? " AND status=$2" : ""
+      }`,
+      [user_id, ...(filter !== null && filter !== undefined ? [filter] : [])]
+    );
+    await dbpg.query(
+      `Select id,title,description,due_date,status from Todo where user_id=$1${
+        filter !== "null" && filter !== "undefined" ? " AND status=$2" : ""
+      }`,
+      [
+        user_id,
+        ...(filter !== "null" && filter !== "undefined" ? [filter] : []),
+      ],
+      async (err: any, result: QueryResultRow) => {
         if (!err) {
           return res.status(200).json({
             message: "Submitted Successfully",
-            toDo: rows,
+            toDo: result.rows,
           });
         }
       }
@@ -119,33 +87,36 @@ const bulkGetTodo = async (
   }
 };
 
+const getCompletedTasks = async (req: Request, res: Response) => {
+  const token = getTokerFromHeader(req);
+};
+
 const getTodo = async (
   req: {
     params: {
       id: string;
     };
   },
-  res: any
+  res: Response
 ) => {
   console.log("get todo", req.params);
 
   const { id } = req.params;
   try {
-    return db.each(
-      "Select * from Todo where id = ?",
+    return await dbpg.query(
+      "Select * from Todo where id = $1",
       [id],
-      (err: any, row: any) => {
+      (err: any, result: QueryResultRow) => {
         if (err) {
           res.status(200).json({
             message: "Not found",
             toDo: null,
           });
         }
-        console.log(row);
 
         return res.status(200).json({
           message: "Submitted Successfully",
-          toDo: row,
+          toDo: result.rows[0],
         });
       }
     );
@@ -159,16 +130,14 @@ const deleteTodo = async (
       id: string;
     };
   },
-  res: any
+  res: Response
 ) => {
-  console.log("delete todo", req.params);
-
   const { id } = req.params;
   try {
-    return db.run(
-      "Delete from Todo where id = ?",
+    return await dbpg.query(
+      "Delete from Todo where id = $1",
       [id],
-      (err: any, row: any) => {
+      (err: any, result: QueryResultRow) => {
         if (err) {
           res.status(200).json({
             message: "Not found",
@@ -177,7 +146,7 @@ const deleteTodo = async (
         }
         return res.status(200).json({
           message: "Deleted Successfully",
-          toDo: row,
+          toDo: result.rows[0],
         });
       }
     );

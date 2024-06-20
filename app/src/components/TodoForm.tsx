@@ -47,6 +47,31 @@ const TodoForm = ({ data, onChange }: any) => (
         />
       </Form.Group>
     </div>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+      }}
+    >
+      <Form.Group
+        className="mb-3"
+        controlId="formBasicAge"
+        style={{ flex: 0.4 }}
+      >
+        <Form.Label>Status</Form.Label>
+        <Form.Select
+          placeholder="12"
+          value={data.status}
+          onChange={onChange}
+          name="status"
+        >
+          <option value="PENDING">Pending</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="COMPLETED">Completed</option>
+        </Form.Select>
+      </Form.Group>
+    </div>
   </Form>
 );
 export default TodoForm;

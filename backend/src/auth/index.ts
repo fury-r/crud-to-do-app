@@ -1,15 +1,23 @@
 import jwt = require("jsonwebtoken");
+import { getTokerFromHeader } from "../utils/common";
+import { Request } from "express";
 const createToken = (value: string): string => {
-  return jwt.sign({ value }, process.env.SECRET_KEY || "Stack", {
-    expiresIn: process.env.TOKEN_LIFESPAN,
+  return jwt.sign({ value }, process.env.JWT_SECRET_KEY || "Stack", {
+    expiresIn: process.env.JWT_EXPIRATION,
   });
 };
 
+export const validateTokenFromHeader = async (req: Request) => {
+  const token = getTokerFromHeader(req);
+  if (token) {
+    return await validateToken(token);
+  }
+  return false;
+};
 const validateToken = async (value: string): Promise<any> => {
-  const email = await jwt.verify(value, process.env.SECRET_KEY || "Stack");
-  console.log(email);
+  const token = await jwt.verify(value, process.env.JWT_SECRET_KEY || "Stack");
   ///@ts-ignore
-  if (email) return email?.value;
+  if (token) return token?.value;
   return false;
 };
 const isAuthenicatedUser = async (req: any, res: any, next: any) => {

@@ -1,6 +1,15 @@
-import { Button } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
+import { Todo, TOperation } from "../types/todo";
+import { useTodo } from "../hooks/useTodo";
+export interface IRecord {
+  value: Todo;
+  index: number;
+  handleSelected: (key: number, mode: TOperation) => void;
+  selected: number;
+}
+const Record = ({ value, index, handleSelected }: IRecord) => {
+  const { updateTodo } = useTodo();
 
-const Record = ({ value, index, handleSelected }: any) => {
   return (
     <div className="row">
       <div
@@ -32,6 +41,30 @@ const Record = ({ value, index, handleSelected }: any) => {
         }}
       >
         <label>{value.due_date}</label>
+      </div>
+      <div
+        className="item"
+        style={{
+          flex: 0.1,
+
+          width: "10%",
+        }}
+      >
+        <Form.Select
+          placeholder="12"
+          value={value.status}
+          onChange={async (e) => {
+            await updateTodo({
+              ...value,
+              status: e.target.value as Todo["status"],
+            });
+          }}
+          name="status"
+        >
+          <option value="PENDING">Pending</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="COMPLETED">Completed</option>
+        </Form.Select>
       </div>
 
       <div
@@ -66,18 +99,6 @@ const Record = ({ value, index, handleSelected }: any) => {
           }}
         >
           Delete
-        </Button>
-        <Button
-          onClick={() => {
-            handleSelected(index, "complete");
-          }}
-          className="button"
-          style={{
-            flex: 0.4,
-            backgroundColor: "orange",
-          }}
-        >
-          Completed
         </Button>
       </div>
     </div>

@@ -1,12 +1,21 @@
+import { Todo } from "../types/todo";
 import Header from "./Header";
-import Record from "./Record";
+import Record, { IRecord } from "./Record";
 
-export const Table = ({ data, handleSelected, selected }: any) => {
+export const Table = ({
+  data,
+  handleSelected,
+  selected,
+}: {
+  data: Todo[];
+  selected: number;
+  handleSelected: IRecord["handleSelected"];
+}) => {
   return (
     <div className="table">
       <Header />
 
-      <div style={{ overflow: "scroll", height: "88vh", marginBottom: "20px" }}>
+      <div style={{ overflow: "auto", height: "90%", marginBottom: "20px" }}>
         {data.length > 0 ? (
           data.map((value: any, key: any) => (
             <Record

@@ -17,7 +17,7 @@ const defaultTheme = createTheme();
 export default function Login() {
   const { errors, login, register } = useAuth();
   const [data, setData] = useState<User>({
-    email: "",
+    username: "",
     password: "",
   });
 
@@ -44,11 +44,11 @@ export default function Login() {
               margin="normal"
               required
               fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
+              id="username"
+              label="Username"
+              name="username"
               onChange={(e) => onChange(e, setData)}
-              autoComplete="email"
+              autoComplete="username"
               autoFocus
             />
             <TextField

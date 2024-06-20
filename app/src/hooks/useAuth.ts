@@ -22,7 +22,7 @@ export const useAuth = () => {
         })
         .then((res) => {
           setUser({
-            email: data.email,
+            username: data.username,
           });
           localStorage.setItem("token", res.data.token);
           navigate("/home");
@@ -47,7 +47,7 @@ export const useAuth = () => {
         .then((res) => {
           setUser(data);
           setUser({
-            email: data.email,
+            username: data.username,
           });
           localStorage.setItem("token", res.data.token);
           navigate("/home");
