@@ -1,7 +1,7 @@
 # crud-to-do-app
 
 
-# To do application CRUD using React Typescipt, NodeJs, SQLite, Express, JWT
+# To do application CRUD using React Typescript, NodeJs, SQLite, Express, JWT
 
 ### You Can use this as a starter kit.
 
@@ -15,36 +15,36 @@
 
 
 ## Frontend
-``sh
+``
 cd app
 ``
 
 ### install packages
-``sh
+``
 npm i
 ``
 
 ### start
-``sh
+``
 npm run dev
 ``
 
 ## Backend
-``sh
+``
 cd backend
 ``
 
 ### install packages
-``sh
+``
 npm i
 ``
 
 ### only do this if db is not there under src/db/
-``sh
+``
 ts-node ./src/db/init_db.ts
 ``
 ### start
-``sh
+``
 npm start
 ``
 
@@ -53,11 +53,11 @@ email:test
 password:test
 
 ## env file variables in backend (.env)
-``
+```sh
 SALT=test
 SECRET_KEY=test
 TOKEN_LIFESPAN=test
-``
+```
 
 
 ## Acknowledgements
