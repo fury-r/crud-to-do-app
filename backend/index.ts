@@ -42,5 +42,5 @@ try {
   main();
 } catch (error) {
   db.close();
-  // dbpg.release();
+  dbpg.release();
 }
