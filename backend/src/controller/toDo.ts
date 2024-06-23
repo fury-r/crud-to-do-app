@@ -36,7 +36,6 @@ const addTodo = async (req: Request, res: Response) => {
 
 const updateTodo = async (req: Request, res: Response) => {
   const { id, title, description, due_date, status } = req.body;
-
   try {
     await dbpg.query(
       `UPDATE Todo SET title=$1, description=$2, due_date=$3, status=$4 where id=$5`,
@@ -56,16 +55,21 @@ const updateTodo = async (req: Request, res: Response) => {
 };
 const bulkGetTodo = async (req: Request, res: Response) => {
   const user_id = await validateTokenFromHeader(req);
+
   try {
     const filter = req.query.filter;
 
     await dbpg.query(
       `Select id,title,description,due_date,status from Todo where user_id=$1${
-        filter !== "null" && filter !== "undefined" ? " AND status=$2" : ""
+        !["null", "undefined", "ALL"].includes(filter as string)
+          ? " AND status=$2"
+          : ""
       }`,
       [
         user_id,
-        ...(filter !== "null" && filter !== "undefined" ? [filter] : []),
+        ...(!["null", "undefined", "ALL"].includes(filter as string)
+          ? [filter]
+          : []),
       ],
       async (err: any, result: QueryResultRow) => {
         if (!err) {

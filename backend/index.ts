@@ -2,7 +2,7 @@ import bodyParser from "body-parser";
 import express from "express";
 import { configDotenv } from "dotenv";
 import { isAuthenicatedUser } from "./src/auth";
-import { loginUser, registerUser } from "./src/controller/user";
+import { loginUser, registerUser, validateUser } from "./src/controller/user";
 import cors from "cors";
 import {
   addTodo,
@@ -26,6 +26,7 @@ async function main() {
 
   app.post("/register", registerUser);
   app.post("/login", loginUser);
+  app.get("/validate", validateUser);
 
   app.post("/todo/add", isAuthenicatedUser, addTodo);
   app.delete("/todo/delete/:id", isAuthenicatedUser, deleteTodo);

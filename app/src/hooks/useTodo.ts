@@ -3,11 +3,19 @@ import axios from "../api/axios";
 import { deleteTodoRedux, setTodo, updateTodoRedux } from "../redux/toDo";
 import { useCallback, useState } from "react";
 import { Todo } from "../types/todo";
+import { useQuery } from "react-query";
 
-export const useTodo = () => {
+export const useTodo = (state: Todo["status"]) => {
   const [status, setStatus] = useState(-1);
-
   const dispatch = useDispatch();
+
+  const { refetch } = useQuery({
+    queryKey: ["toDo", state],
+    queryFn: (data) => getTodo(data),
+    onSuccess: (data: any) => {
+      if (data) dispatch(setTodo(data));
+    },
+  });
 
   const addTodo = useCallback(
     async (data: Todo) => {
@@ -59,23 +67,26 @@ export const useTodo = () => {
     [dispatch]
   );
 
-  const bulkGet = async (filter?: Todo["status"] | null) => {
-    await axios
-      .post(`todo/bulk/get?filter=${filter}`)
-      .then((res) => {
-        if (res.data) {
-          dispatch(setTodo(res.data.toDo));
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+  const getTodo = async (options?: any) => {
+    try {
+      const res = await axios.post(
+        `todo/bulk/get?filter=${
+          options.queryKey[1] !== "All" ? options.queryKey[1] : "null"
+        }`
+      );
+
+      return res.data.toDo;
+    } catch (err) {
+      console.error(err);
+    }
   };
+
   return {
     addTodo,
     updateTodo,
     deleteTodo,
     status,
-    bulkGet,
+    bulkGet: refetch,
+    getTodo,
   };
 };

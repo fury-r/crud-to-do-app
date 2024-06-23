@@ -14,7 +14,6 @@ export const useAuth = () => {
       if (!errors) {
         setErrors(null);
       }
-      console.log("login");
 
       await axios
         .post("/login", {
@@ -34,6 +33,7 @@ export const useAuth = () => {
     },
     [errors, navigate, setUser]
   );
+
   const register = useCallback(
     async (data: User) => {
       if (!errors) {
@@ -58,9 +58,24 @@ export const useAuth = () => {
     },
     [errors, navigate, setUser]
   );
+
+  const validateUser = useCallback(async () => {
+    await axios
+      .get("/validate")
+      .then((res) => {
+        setUser({
+          username: res.data.username,
+        });
+        navigate("/home");
+      })
+      .catch((_err: Error) => {
+        if (localStorage.getItem("token")) localStorage.removeItem("token");
+      });
+  }, [navigate, setUser]);
   return {
     register,
     login,
     errors,
+    validateUser,
   };
 };

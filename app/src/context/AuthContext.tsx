@@ -12,6 +12,7 @@ type IAuthContext = {
 const AuthContext = createContext<IAuthContext | null>(null);
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const user = useSelector((state: RootState) => state.user);
+
   const dispatch = useDispatch();
   const setUser = (value?: User) => {
     dispatch(setAuthUser(value));

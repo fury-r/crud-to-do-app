@@ -5,7 +5,7 @@ export const createUserTable = () => {
       CREATE TABLE IF NOT EXISTS Users
       (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email   VARCHAR(50) NOT NULL,
+        username   VARCHAR(50) NOT NULL,
         password   VARCHAR(50) NOT NULL
       );
     `);
@@ -14,7 +14,7 @@ export const createUserTable = () => {
       CREATE TABLE IF NOT EXISTS Users
       (
         id BIGSERIAL PRIMARY KEY ,
-        email   VARCHAR(50) NOT NULL,
+        username   VARCHAR(50) NOT NULL,
         password   VARCHAR(150) NOT NULL
       );
     `
@@ -44,7 +44,6 @@ export const createTodoListTable = () => {
           description   VARCHAR(50),
           due_date DATE NOT NULL,
           status VARCHAR(100),
-
           user_id INTEGER,
            CONSTRAINT FK_UserTodo  FOREIGN KEY(user_id) 
           REFERENCES Users(id)

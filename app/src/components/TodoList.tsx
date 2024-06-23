@@ -1,5 +1,5 @@
 import { Button, Form } from "react-bootstrap";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import DialogBox from "./DialogBox";
 import BackupTableIcon from "@mui/icons-material/BackupTable";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -16,19 +16,17 @@ export const TodoList = () => {
   const data = useSelector((state: RootState) => state.toDo.toDo);
   const [mode, setMode] = useState<TOperation>("insert");
   const [view, setView] = useState<boolean>(false); //by default table
-  const { bulkGet } = useTodo();
+  const [todoStatus, setTodoStatus] = useState<Todo["status"]>("ALL");
+  const { bulkGet } = useTodo(todoStatus);
   const [show, setShow] = useState(false);
   const [selected, setSelected] = useState(-1);
+
   const { setUser } = useAuthContext();
   const navigate = useNavigate();
 
   const getUserInformation = useCallback(async () => {
     await bulkGet();
   }, [bulkGet]);
-
-  useEffect(() => {
-    getUserInformation();
-  }, []);
 
   const handleSelected = (key: number, mode: TOperation) => {
     setSelected(key);
@@ -42,10 +40,11 @@ export const TodoList = () => {
       getUserInformation();
     };
   }, [getUserInformation]);
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser();
+    localStorage.removeItem("token");
     navigate("/");
-  };
+  }, [navigate, setUser]);
 
   return (
     <div
@@ -89,6 +88,17 @@ export const TodoList = () => {
             Add new
           </Button>
           <Button
+            onClick={() => {
+              bulkGet();
+            }}
+            className="button"
+            style={{
+              backgroundColor: "#494949",
+            }}
+          >
+            Refetch
+          </Button>
+          <Button
             onClick={() => logout()}
             className="button"
             style={{
@@ -107,12 +117,10 @@ export const TodoList = () => {
             </b>
             <Form.Select
               placeholder="12"
+              value={todoStatus}
               onChange={async (e) => {
-                const filter = e.target.value;
-                console.log(e.target.value);
-                bulkGet(
-                  filter !== "All" ? (e.target.value as Todo["status"]) : null
-                );
+                setTodoStatus(e.target.value as Todo["status"]);
+                bulkGet();
               }}
               name="status"
             >
