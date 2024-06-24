@@ -59,7 +59,6 @@ const validateUser = async (req: Request, res: Response) => {
         "Select * from  users WHERE id=$1",
         [token],
         (err: Error, result: QueryResultRow) => {
-          console.log(result.rows[0]);
           if (result?.rows?.length > 0) {
             res.status(200).send({
               message: "Valid Token",

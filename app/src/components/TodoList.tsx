@@ -1,5 +1,5 @@
 import { Button, Form } from "react-bootstrap";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DialogBox from "./DialogBox";
 import BackupTableIcon from "@mui/icons-material/BackupTable";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -28,18 +28,23 @@ export const TodoList = () => {
     await bulkGet();
   }, [bulkGet]);
 
+  useEffect(() => {
+    getUserInformation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSelected = (key: number, mode: TOperation) => {
     setSelected(key);
-
     setShow(true);
     setMode(mode);
   };
-
+  console.log(data);
   const handleDataChange = useCallback(() => {
     () => {
       getUserInformation();
     };
   }, [getUserInformation]);
+
   const logout = useCallback(() => {
     setUser();
     localStorage.removeItem("token");
@@ -118,14 +123,15 @@ export const TodoList = () => {
             <Form.Select
               placeholder="12"
               value={todoStatus}
-              onChange={async (e) => {
-                setTodoStatus(e.target.value as Todo["status"]);
-                bulkGet();
-              }}
+              onChange={async (e) =>
+                e.target.value &&
+                setTodoStatus(e.target.value as Todo["status"])
+              }
               name="status"
             >
-              <option value="All">All</option>
-
+              <option defaultChecked value="ALL">
+                All
+              </option>
               <option value="PENDING">Pending</option>
               <option value="IN_PROGRESS">In Progress</option>
               <option value="COMPLETED">Completed</option>

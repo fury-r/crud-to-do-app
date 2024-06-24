@@ -15,9 +15,16 @@ export const validateTokenFromHeader = async (req: Request) => {
   return false;
 };
 const validateToken = async (value: string): Promise<any> => {
-  const token = await jwt.verify(value, process.env.JWT_SECRET_KEY || "Stack");
-  ///@ts-ignore
-  if (token) return token?.value;
+  try {
+    const token = await jwt.verify(
+      value,
+      process.env.JWT_SECRET_KEY || "Stack"
+    );
+    ///@ts-ignore
+    if (token) return token?.value;
+  } catch (err) {
+    console.error(err);
+  }
   return false;
 };
 const isAuthenicatedUser = async (req: any, res: any, next: any) => {

@@ -3,6 +3,6 @@ export type Todo = {
   title?: string;
   description?: string;
   due_date?: string;
-  status?: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "ALL";
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "ALL";
 };
 export type TOperation = "update" | "insert" | "delete" | "complete";

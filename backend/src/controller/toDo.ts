@@ -8,7 +8,6 @@ const addTodo = async (req: Request, res: Response) => {
   const { title, description, due_date, status } = req.body;
   try {
     const id = await validateTokenFromHeader(req);
-    console.log("user_id", id);
     if (id) {
       await dbpg.query(
         `INSERT INTO Todo(title,description,due_date, status,user_id) VALUES ($1,$2,$3,$4,$5)`,
@@ -58,19 +57,13 @@ const bulkGetTodo = async (req: Request, res: Response) => {
 
   try {
     const filter = req.query.filter;
+    console.log("get todo", filter);
 
     await dbpg.query(
       `Select id,title,description,due_date,status from Todo where user_id=$1${
-        !["null", "undefined", "ALL"].includes(filter as string)
-          ? " AND status=$2"
-          : ""
+        filter !== "ALL" ? " AND status=$2" : ""
       }`,
-      [
-        user_id,
-        ...(!["null", "undefined", "ALL"].includes(filter as string)
-          ? [filter]
-          : []),
-      ],
+      [user_id, ...(filter !== "ALL" ? [filter] : [])],
       async (err: any, result: QueryResultRow) => {
         if (!err) {
           return res.status(200).json({
